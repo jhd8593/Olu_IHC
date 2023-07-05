@@ -1,0 +1,116 @@
+//choose directory, make sure to use / instead of \ 
+dir="C:/Users/Jon/Desktop/Test1/ImageTest1";
+FITCResults="C:/Users/Jon/Desktop/Test1/FITCResults";
+DAPIResults= "C:/Users/Jon/Desktop/Test1/DAPIResults"
+
+print("searching "+dir);
+
+//get all files in directory
+//make sure all files in this directory are images
+imageList = getFileList(dir);
+
+
+print("Files: ");
+for (i = 0; i < imageList.length; i++) {
+	print(imageList[i]);
+}
+
+//loop through every file name
+for(i=0;i<imageList.length;i++){
+	print("Processing: "+imageList[i]);
+	//see if the file is an image
+	if(isImage(imageList[i])){
+		//if it is an image, open it
+		open(dir+"/"+imageList[i]);
+		//and then processes it
+		makeRectangle(0, 4, 2046, 1998);
+		run("Crop");
+		lesgo();
+		close("*");
+	}
+}
+
+//close results after processing
+close("Results");
+
+
+
+function lesgo(){
+	run("Split Channels");
+
+	  list = getList("image.titles");
+	  if (list.length==0)
+	     print("No image windows are open");
+	  else {
+	     print("Image windows:");
+	     for (i=0; i<list.length; i++){
+	     	imageName=list[i];
+	        print("Processing: "+imageName);
+	        if(matches(imageName, ".*red*")){
+	        	selectImage(imageName);
+	        	close();
+	        }else if(matches(imageName, ".*green.*")){
+	        	green();
+	        }else if(matches(imageName, ".*blue.*")){
+	        	blue();		
+	        }
+	     }
+	  }
+	 print("");
+	 close("*");
+
+
+}
+
+function blue(){
+	print(imageName+" matches regex");
+				run("Clear Results");
+	        	selectImage(imageName);
+	        	print(getImageID());
+				run("Sharpen");	
+				run("Auto Threshold", "method=Otsu ignore_black white");
+				run("Watershed");
+				run("Remove Outliers...", "radius=10 threshold=50 which=Bright");
+				id=getImageID();
+				run("Analyze Particles...", "pixel show=Outlines display summarize");
+				saveAs("png", DAPIResults +"/"+imageName + "DAPI Results.png");
+				close(id);
+				selectWindow("Summary");
+				saveAs("Results",dir+"/"+imageName +" Results.csv");
+				close("Summary");
+				close(dir+"/"+imageName +" Results.csv");
+}
+
+function green(){
+	print(imageName+" matches regex");
+	        	selectImage(imageName);	        	
+				run("Find Edges");
+				run("Subtract Background...", "rolling=5");	
+				run("Threshold...");
+				setThreshold(134, 255);
+				setOption("BlackBackground", true);
+				run("Convert to Mask");
+				close("Threshold");
+				id=getImageID();
+				run("Analyze Particles...", "pixel show=Outlines display summarize");
+				saveAs("png", FITCResults +"/"+imageName + "FITC Results.png");
+				close(id);
+				selectWindow("Summary");
+				saveAs("Results",dir+"/"+imageName +" Summary.csv");
+				close("Summary");
+				close(dir+"/"+imageName +" Summary.csv");
+}
+close("Summary.csv");
+function isImage(string){
+	if(matches(string, ".*.(jpg|tif|png|tiff)")){
+		return true;
+	}else{
+		return false;
+	}
+}
+
+close("Threshold");
+close("Log");
+close("Summary");
+close("*");
+close("Results");
