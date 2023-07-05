@@ -1,0 +1,246 @@
+if (!require("pacman")) install.packages("pacman"); library(pacman)
+p_unload('all')
+pacman::p_load(BiocManager, ggh4x, DT, openxlsx, readxl, rstatix, ggpubr, janitor,ggstatsplot, tidyverse, nortest,broom,svglite,dlookr,ggpattern,plotrix)
+## --------------------------------------------------------------------------------------------------------
+# Add Cerebellum Data
+folder<-"C:/Users/Jon/Desktop/Cerebellum_Olu"
+allcsvs <- sort(list.files(path = folder, pattern = "*.csv", full.names = TRUE, recursive = FALSE))
+allData <- data.frame()
+for(file in allcsvs) {
+  df <- read.csv(file)
+  allData <- rbind(allData, df)
+}
+write.csv(allData, file = "C:/Users/Jon/Desktop/Cerebellum_Olu/combined.csv", row.names = FALSE)
+df <- allData %>% mutate(Group = str_extract(Slice, "cerebellum [[:alnum:]]+"))
+df_blue <- df %>% filter(str_detect(Slice, "blue"))
+df_green <- df %>% filter(str_detect(Slice, "green"))
+names(df_blue)[names(df_blue) == 'Total.Area'] <- 'Total.Area.blue'
+names(df_green)[names(df_green) == 'Total.Area'] <- 'Total.Area.green'
+df_joined <- inner_join(df_blue, df_green, by = "Group")
+df_joined <- df_joined %>% mutate(Average_Total_Area = (Total.Area.green / Total.Area.blue) )
+df_joined <- df_joined %>% mutate(Cerebellum_Type = str_extract(Group, "cerebellum [[:digit:]]"))
+df_final <- df_joined %>% group_by(Cerebellum_Type) %>% summarise(Average_of_Averages = mean(Average_Total_Area, na.rm = TRUE))
+## --------------------------------------------------------------------------------------------------------
+# Add Liver Data
+folder_2<-"C:/Users/Jon/Desktop/Liver_Olu"
+allcsvs_2 <- sort(list.files(path = folder_2, pattern = "*.csv", full.names = TRUE, recursive = FALSE))
+allData_2 <- data.frame()
+for(file in allcsvs_2) {
+  df <- read.csv(file)
+  allData_2 <- rbind(allData_2, df)
+}
+write.csv(allData_2, file = "C:/Users/Jon/Desktop/Liver_Olu/combined.csv", row.names = FALSE)
+df_2 <- allData_2 %>% mutate(Group = str_extract(Slice, "liver [[:alnum:]]+"))
+df_blue_2 <- df_2 %>% filter(str_detect(Slice, "blue"))
+df_green_2 <- df_2 %>% filter(str_detect(Slice, "green"))
+names(df_blue_2)[names(df_blue_2) == 'Total.Area'] <- 'Total.Area.blue'
+names(df_green_2)[names(df_green_2) == 'Total.Area'] <- 'Total.Area.green'
+df_joined_2 <- inner_join(df_blue_2, df_green_2, by = "Group")
+df_joined_2 <- df_joined_2 %>% mutate(Average_Total_Area = (Total.Area.green / Total.Area.blue) )
+df_joined_2 <- df_joined_2 %>% mutate(Liver_Type = str_extract(Group, "liver [[:digit:]]"))
+# Complete the statement for the new dataset
+df_final_2 <- df_joined_2 %>% group_by(Liver_Type) %>% summarise(Average_of_Averages = mean(Average_Total_Area, na.rm = TRUE))
+## --------------------------------------------------------------------------------------------------------
+# Add Distal Lung Data
+folder_3<- "C:/Users/Jon/Desktop/DistalLung_Olu"
+# Get a list of all CSV files in the directory
+allcsvs_3 <- sort(list.files(path = folder_3, pattern = "*.csv", full.names = TRUE, recursive = FALSE))
+# Load all CSV files into a single data frame
+allData_3 <- data.frame()
+for(file in allcsvs_3) {
+  df <- read.csv(file)
+  allData_3 <- rbind(allData_3, df)
+}
+write.csv(allData_3, file = "C:/Users/Jon/Desktop/DistalLung_Olu/combined.csv", row.names = FALSE)
+df_3 <- allData_3 %>% mutate(Group = str_extract(Slice, "distal lung [[:alnum:]]+"))
+df_blue_3 <- df_3 %>% filter(str_detect(Slice, "blue"))
+df_green_3 <- df_3 %>% filter(str_detect(Slice, "green"))
+names(df_blue_3)[names(df_blue_3) == 'Total.Area'] <- 'Total.Area.blue'
+names(df_green_3)[names(df_green_3) == 'Total.Area'] <- 'Total.Area.green'
+df_joined_3 <- inner_join(df_blue_3, df_green_3, by = "Group")
+df_joined_3 <- df_joined_3 %>% mutate(Average_Total_Area = (Total.Area.green / Total.Area.blue) )
+df_joined_3 <- df_joined_3 %>% mutate(DistalLung_Type = str_extract(Group, "distal lung [[:digit:]]"))
+# Complete the statement for the new dataset
+df_final_3 <- df_joined_3 %>% group_by(DistalLung_Type) %>% summarise(Average_of_Averages = mean(Average_Total_Area, na.rm = TRUE))
+## --------------------------------------------------------------------------------------------------------
+# Add Proximal Lung Data
+folder_4<- "C:/Users/Jon/Desktop/Proximal Lung_Olu"
+# Get a list of all CSV files in the directory
+allcsvs_4 <- sort(list.files(path = folder_4, pattern = "*.csv", full.names = TRUE, recursive = FALSE))
+# Load all CSV files into a single data frame
+allData_4 <- data.frame()
+for(file in allcsvs_4) {
+  df <- read.csv(file)
+  allData_4 <- rbind(allData_4, df)
+}
+write.csv(allData_4, file = "C:/Users/Jon/Desktop/Proximal Lung_Olu/combined.csv", row.names = FALSE)
+df_4 <- allData_4 %>% mutate(Group = str_extract(Slice, "lung [[:alnum:]]+"))
+df_blue_4 <- df_4 %>% filter(str_detect(Slice, "blue"))
+df_green_4 <- df_4 %>% filter(str_detect(Slice, "green"))
+names(df_blue_4)[names(df_blue_4) == 'Total.Area'] <- 'Total.Area.blue'
+names(df_green_4)[names(df_green_4) == 'Total.Area'] <- 'Total.Area.green'
+df_joined_4 <- inner_join(df_blue_4, df_green_4, by = "Group")
+df_joined_4 <- df_joined_4 %>% mutate(Average_Total_Area = (Total.Area.green / Total.Area.blue) )
+df_joined_4 <- df_joined_4 %>% mutate(ProximalLung_Type = str_extract(Group, "lung [[:digit:]]"))
+# Complete the statement for the new dataset
+df_final_4 <- df_joined_4 %>% group_by(ProximalLung_Type) %>% summarise(Average_of_Averages = mean(Average_Total_Area, na.rm = TRUE))
+
+## --------------------------------------------------------------------------------------------------------
+# Add Spleen Data
+folder_5 <- "C:/Users/Jon/Desktop/Spleen_Olu"
+# Get a list of all CSV files in the directory
+allcsvs_5 <- sort(list.files(path = folder_5, pattern = "*.csv", full.names = TRUE, recursive = FALSE))
+# Load all CSV files into a single data frame
+allData_5 <- data.frame()
+for(file in allcsvs_5) {
+  df <- read.csv(file)
+  allData_5 <- rbind(allData_5, df)
+}
+write.csv(allData_5, file = "C:/Users/Jon/Desktop/Spleen_Olu/combined.csv", row.names = FALSE)
+df_5 <- allData_5 %>% mutate(Group = str_extract(Slice, "spleen [[:alnum:]]+"))
+df_blue_5 <- df_5 %>% filter(str_detect(Slice, "blue"))
+df_green_5 <- df_5 %>% filter(str_detect(Slice, "green"))
+names(df_blue_5)[names(df_blue_5) == 'Total.Area'] <- 'Total.Area.blue'
+names(df_green_5)[names(df_green_5) == 'Total.Area'] <- 'Total.Area.green'
+df_joined_5 <- inner_join(df_blue_5, df_green_5, by = "Group")
+df_joined_5 <- df_joined_5 %>% mutate(Average_Total_Area = (Total.Area.green / Total.Area.blue) )
+df_joined_5 <- df_joined_5 %>% mutate(spleen_Type = str_extract(Group, "spleen [[:digit:]]"))
+# Complete the statement for the new dataset
+df_final_5 <- df_joined_5 %>% group_by(spleen_Type) %>% summarise(Average_of_Averages = mean(Average_Total_Area, na.rm = TRUE))
+
+## --------------------------------------------------------------------------------------------------------
+# Add Pancreas Data
+folder_6 <- "C:/Users/Jon/Desktop/Pancreas_Olu"
+# Get a list of all CSV files in the directory
+allcsvs_6 <- sort(list.files(path = folder_6, pattern = "*.csv", full.names = TRUE, recursive = FALSE))
+# Load all CSV files into a single data frame
+allData_6 <- data.frame()
+for(file in allcsvs_6) {
+  df <- read.csv(file)
+  allData_6 <- rbind(allData_6, df)
+}
+write.csv(allData_6, file = "C:/Users/Jon/Desktop/Pancreas_Olu/combined.csv", row.names = FALSE)
+df_6 <- allData_6 %>% mutate(Group = str_extract(Slice, "Pancreas [[:alnum:]]+"))
+df_blue_6 <- df_6 %>% filter(str_detect(Slice, "blue"))
+df_green_6 <- df_6 %>% filter(str_detect(Slice, "green"))
+names(df_blue_6)[names(df_blue_6) == 'Total.Area'] <- 'Total.Area.blue'
+names(df_green_6)[names(df_green_6) == 'Total.Area'] <- 'Total.Area.green'
+df_joined_6 <- inner_join(df_blue_6, df_green_6, by = "Group")
+df_joined_6<- df_joined_6%>% mutate(Average_Total_Area = (Total.Area.green / Total.Area.blue) )
+df_joined_6 <- df_joined_6%>% mutate(Pancreas_Type = str_extract(Group, "Pancreas [[:digit:]]"))
+# Complete the statement for the new dataset
+df_final_6 <- df_joined_6 %>% group_by(Pancreas_Type) %>% summarise(Average_of_Averages = mean(Average_Total_Area, na.rm = TRUE))
+
+## --------------------------------------------------------------------------------------------------------
+# Add L.Intestine Data
+folder_7 <- "C:/Users/Jon/Desktop/L.Intestine_Olu"
+# Get a list of all CSV files in the directory
+allcsvs_7 <- sort(list.files(path = folder_7, pattern = "*.csv", full.names = TRUE, recursive = FALSE))
+# Load all CSV files into a single data frame
+allData_7 <- data.frame()
+for(file in allcsvs_7) {
+  df <- read.csv(file)
+  allData_7 <- rbind(allData_7, df)
+}
+write.csv(allData_7, file = "C:/Users/Jon/Desktop/L.Intestine_Olu/combined.csv", row.names = FALSE)
+df_7 <- allData_7 %>% mutate(Group = str_extract(Slice, "L.Intestine [[:alnum:]]+"))
+df_blue_7 <- df_7 %>% filter(str_detect(Slice, "blue"))
+df_green_7 <- df_7 %>% filter(str_detect(Slice, "green"))
+names(df_blue_7)[names(df_blue_7) == 'Total.Area'] <- 'Total.Area.blue'
+names(df_green_7)[names(df_green_7) == 'Total.Area'] <- 'Total.Area.green'
+df_joined_7 <- inner_join(df_blue_7, df_green_7, by = "Group")
+df_joined_7<- df_joined_7%>% mutate(Average_Total_Area = (Total.Area.green / Total.Area.blue) )
+df_joined_7 <- df_joined_7%>% mutate(L.Intestine_Type = str_extract(Group, "L.Intestine [[:digit:]]"))
+# Complete the statement for the new dataset
+df_final_7 <- df_joined_7 %>% group_by(L.Intestine_Type) %>% summarise(Average_of_Averages = mean(Average_Total_Area, na.rm = TRUE))
+
+## --------------------------------------------------------------------------------------------------------
+# Add Ileum Data
+folder_8 <- "C:/Users/Jon/Desktop/Ileum_Olu"
+# Get a list of all CSV files in the directory
+allcsvs_8 <- sort(list.files(path = folder_8, pattern = "*.csv", full.names = TRUE, recursive = FALSE))
+# Load all CSV files into a single data frame
+allData_8 <- data.frame()
+for(file in allcsvs_8) {
+  df <- read.csv(file)
+  allData_8 <- rbind(allData_8, df)
+}
+write.csv(allData_8, file = "C:/Users/Jon/Desktop/Ileum_Olu/combined.csv", row.names = FALSE)
+df_8 <- allData_8 %>% mutate(Group = str_extract(Slice, "ileum [[:alnum:]]+"))
+df_blue_8 <- df_8 %>% filter(str_detect(Slice, "blue"))
+df_green_8 <- df_8 %>% filter(str_detect(Slice, "green"))
+names(df_blue_8)[names(df_blue_8) == 'Total.Area'] <- 'Total.Area.blue'
+names(df_green_8)[names(df_green_8) == 'Total.Area'] <- 'Total.Area.green'
+df_joined_8 <- inner_join(df_blue_8, df_green_8, by = "Group")
+df_joined_8<- df_joined_8%>% mutate(Average_Total_Area = (Total.Area.green / Total.Area.blue) )
+df_joined_8 <- df_joined_8%>% mutate(Ileum_Type = str_extract(Group, "ileum [[:digit:]]"))
+# Complete the statement for the new dataset
+df_final_8 <- df_joined_8 %>% group_by(Ileum_Type) %>% summarise(Average_of_Averages = mean(Average_Total_Area, na.rm = TRUE))
+
+## --------------------------------------------------------------------------------------------------------
+# Merge All datasets together
+# Continue renaming the 'Type' column for all dataframes
+names(df_final_2)[names(df_final_2) == 'Liver_Type'] <- 'Type'
+names(df_final_3)[names(df_final_3) == 'DistalLung_Type'] <- 'Type'
+names(df_final_4)[names(df_final_4) == 'ProximalLung_Type'] <- 'Type'
+names(df_final_5)[names(df_final_5) == 'spleen_Type'] <- 'Type'
+names(df_final_6)[names(df_final_6) == 'Pancreas_Type'] <- 'Type'
+names(df_final_7)[names(df_final_7) == 'L.Intestine_Type'] <- 'Type'
+names(df_final_8)[names(df_final_8) == 'Ileum_Type'] <- 'Type'
+
+# Add an organ column for identification
+df_final$Organ <- 'Cerebellum'
+df_final_2$Organ <- 'Liver'
+df_final_3$Organ <- 'Distal Lung'
+df_final_4$Organ <- 'Proximal Lung'
+df_final_5$Organ <- 'Spleen'
+df_final_6$Organ <- 'Pancreas'
+df_final_7$Organ <- 'L.Intestine'
+df_final_8$Organ <- 'Ileum'
+
+# Assign the organ name to each dataframe
+df_final$Organ <- 'Cerebellum'
+df_final_2$Organ <- 'Liver'
+df_final_3$Organ <- 'Distal Lung'
+df_final_4$Organ <- 'Proximal Lung'
+df_final_5$Organ <- 'Spleen'
+df_final_6$Organ <- 'Pancreas'
+df_final_7$Organ <- 'L.Intestine'
+df_final_8$Organ <- 'Ileum'
+
+# Combine all dataframes
+df_all <- bind_rows(df_final, df_final_2, df_final_3, df_final_4, df_final_5, df_final_6, df_final_7, df_final_8)
+
+# Reorder levels of the Organ factor
+df_all$Organ <- factor(df_all$Organ, levels = c('Cerebellum', 'Liver', 'Proximal Lung', 'Distal Lung', 'Spleen', 'Pancreas', 'L.Intestine', 'Ileum'))
+
+# Now create the summary_stats dataframe and the plot as before
+summary_stats <- df_all %>% group_by(Organ) %>% summarise(grand_mean = mean(Average_of_Averages, na.rm = TRUE),
+                                                           sem = sd(Average_of_Averages, na.rm = TRUE) / sqrt(n()))
+
+plot <- ggplot(summary_stats, aes(x = Organ, y = grand_mean)) +
+  geom_bar(stat = "identity", fill = 'grey', colour = "black", width = 0.8) +
+  geom_errorbar(aes(ymin = grand_mean - sem, ymax = grand_mean + sem), width = 0.2, colour = "black", size = 1.5, lwd = 1.5) +
+  geom_point(data = df_all, aes(x = Organ, y = Average_of_Averages),
+             position = position_jitter(width = 0.2), color = "black") +
+  labs(x = "Organ", y = "Average GFP Fluorescence Intensity (%)") +
+  theme_bw() +
+  ggtitle("Mean GFP Fluorescence Intensity Across All Tissue Types") +
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+        axis.title.x = element_text(size = 14, face = "bold"),
+        axis.title.y = element_text(size = 14, face = "bold"),
+        axis.text.x = element_text(size = 12, face = "bold", angle = 0),
+        axis.text.y = element_text(size = 12),
+        panel.grid = element_blank(),
+        panel.border = element_blank(),
+        axis.line.x = element_line(color = "black"),
+        axis.line.y = element_line(color = "black")) +
+  scale_y_log10() +
+  scale_y_continuous(expand = expansion(add = c(0, 0)),breaks = c(0, .04, .06, .08, .1,.12,.14,.16,.18), limits = c(0,.18))
+
+
+
+
+
+ggsave("C:/Users/Jon/Desktop/my_plot.pdf", plot)
+system("open C:/Users/Jon/Desktop/my_plot.pdf")
