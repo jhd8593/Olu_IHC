@@ -1,6 +1,6 @@
 if (!require("pacman")) install.packages("pacman"); library(pacman)
 p_unload('all')
-pacman::p_load(BiocManager, ggh4x, DT, openxlsx, readxl, rstatix, ggpubr, janitor,ggstatsplot, tidyverse, nortest,broom,svglite,dlookr,ggpattern,plotrix)
+pacman::p_load(BiocManager, ggh4x, DT, openxlsx, readxl, rstatix, ggpubr, janitor,ggstatsplot, tidyverse, nortest,broom,svglite,dlookr,ggpattern,plotrix, gridExtra,ggbreak, patchwork, ggtext)
 ## --------------------------------------------------------------------------------------------------------
 # Add Cerebellum Data
 folder<-"C:/Users/Jon/Desktop/Cerebellum_Olu"
@@ -211,32 +211,66 @@ df_final_8$Organ <- 'Ileum'
 # Combine all dataframes
 df_all <- bind_rows(df_final, df_final_2, df_final_3, df_final_4, df_final_5, df_final_6, df_final_7, df_final_8)
 
-# Reorder levels of the Organ factor
-df_all$Organ <- factor(df_all$Organ, levels = c('Cerebellum', 'Liver', 'Proximal Lung', 'Distal Lung', 'Spleen', 'Pancreas', 'L.Intestine', 'Ileum'))
-
-# Now create the summary_stats dataframe and the plot as before
+# Create a summary_stats data frame for each organ
 summary_stats <- df_all %>% group_by(Organ) %>% summarise(grand_mean = mean(Average_of_Averages, na.rm = TRUE),
                                                            sem = sd(Average_of_Averages, na.rm = TRUE) / sqrt(n()))
 
-plot <- ggplot(summary_stats, aes(x = Organ, y = grand_mean)) +
-  geom_bar(stat = "identity", fill = 'grey', colour = "black", width = 0.8) +
-  geom_errorbar(aes(ymin = grand_mean - sem, ymax = grand_mean + sem), width = 0.2, colour = "black", size = 1.5, lwd = 1.5) +
+# Create the bottom plot
+plot1 <- ggplot(summary_stats, aes(x = Organ, y = grand_mean)) +
+  geom_bar(stat = "identity", fill = 'grey', colour = "black", width = 0.5, position = position_dodge(0.9)) +
+  geom_errorbar(aes(ymin = grand_mean - sem, ymax = grand_mean + sem), width = 0.2, colour = "black", size = 1, lwd = 1) +
   geom_point(data = df_all, aes(x = Organ, y = Average_of_Averages),
              position = position_jitter(width = 0.2), color = "black") +
-  labs(x = "Organ", y = "Average GFP Fluorescence Intensity (%)") +
-  theme_bw() +
-  ggtitle("Mean GFP Fluorescence Intensity Across All Tissue Types") +
+  labs(x = "Organ", y = "") +
+  theme_classic() +
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
         axis.title.x = element_text(size = 14, face = "bold"),
-        axis.title.y = element_text(size = 14, face = "bold"),
-        axis.text.x = element_text(size = 12, face = "bold", angle = 0),
+        axis.text.x = element_text(size = 10, face = "bold", angle = 0),
         axis.text.y = element_text(size = 12),
         panel.grid = element_blank(),
-        panel.border = element_blank(),
+        legend.position = "none",
+        plot.title.position = "plot",
         axis.line.x = element_line(color = "black"),
         axis.line.y = element_line(color = "black")) +
-  scale_y_log10() +
-  scale_y_continuous(expand = expansion(add = c(0, 0)),breaks = c(0, .04, .06, .08, .1,.12,.14,.16,.18), limits = c(0,.18))
+  coord_cartesian(ylim = c(0, .035)) +
+  scale_y_continuous(expand = c(0, 0), breaks = c(0.01, 0.02, 0.03))  # Add custom ticks
+
+
+# Create the top plot
+plot2 <- ggplot(summary_stats, aes(x = Organ, y = grand_mean)) +
+  geom_bar(stat = "identity", fill = 'grey', colour = "black", width = 0.5, position = position_dodge(0.9)) +
+  geom_errorbar(aes(ymin = grand_mean - sem, ymax = grand_mean + sem), width = 0.2, colour = "black", size = 1, lwd = 1) +  # Adjusted line width
+  geom_point(data = df_all, aes(x = Organ, y = Average_of_Averages),
+             position = position_jitter(width = 0.2), color = "black") +
+  labs(x = "", y = "") +  # Removed y label
+  theme_classic() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_text(size = 12),
+        panel.grid = element_blank(),
+        legend.position = "none",
+        axis.line.x = element_blank(),
+        axis.line.y = element_line(color = "black")) +
+  coord_cartesian(ylim = c(.04, .20)) +
+  scale_y_continuous(position = "left",
+                     expand = c(0, 0))  # No padding below the bars
+
+# Stack the plots
+final_plot <- plot2 / plot1 +
+  labs(y = "Average GFP Fluorescence Intensity (%)") +  # Add y label to combined plot
+  theme(axis.title.y = element_text(size = 14, face = "bold"))  # Adjust y label properties
+
+# Display the final plot
+print(final_plot)
+
+
+# Save the plot
+ggsave("C:/Users/Jon/Desktop/my_plot.svg", plot)
+system("start C:/Users/Jon/Desktop/my_plot.svg")
+
+
+
 
 
 
